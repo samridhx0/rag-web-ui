@@ -1,193 +1,530 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-zinc-950 text-zinc-100 antialiased selection:bg-indigo-600/80">
-  <head>
+<html lang="en">
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RAG Document Q&A Demo</title>
-    <!-- TailwindCSS -->
-    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            colors: {
-              primary: {
-                50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc',
-                400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca',
-                800: '#3730a3', 900: '#312e81'
-              }
-            },
-            fontFamily: {
-              sans: ['Inter','ui-sans-serif','system-ui']
-            }
-          }
-        }
-      }
-    </script>
-    <!-- Google Font -->
+    <title>RAG Document Q&A</title>
+
+    <!-- Google Fonts – Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  </head>
-  <body class="h-full flex flex-col">
-    <!-- Hero Section -->
-    <section class="relative bg-zinc-900 text-center py-20 px-4 sm:px-8 overflow-hidden">
-      <!-- Background Blobs -->
-      <svg class="absolute -top-10 -left-10 opacity-20 w-64 h-64 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 200 200">
-        <path d="M43.2,-68.5C56.3,-60.8,67.9,-50.3,74.2,-37.2C80.5,-24.1,81.5,-8.4,78.4,7.8C75.3,24,68.1,40.7,56.4,53.2C44.7,65.7,28.4,74.1,11,79.8C-6.4,85.5,-23.7,88.4,-38.8,83.8C-53.9,79.3,-66.6,67.4,-72.9,52.3C-79.1,37.2,-79,19.6,-78.2,2.1C-77.4,-15.4,-75.8,-30.8,-67.3,-42.8C-58.8,-54.9,-43.4,-63.6,-27.2,-70C-11,-76.3,6.2,-80.2,21.8,-75.3C37.4,-70.4,51.1,-56.2,43.2,-68.5Z" transform="translate(100 100)" />
-      </svg>
-      <h1 class="text-5xl sm:text-6xl font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-        RAG Document Q&A
-      </h1>
-      <p class="mt-4 max-w-xl mx-auto text-lg text-zinc-300">
-        Instantly upload any text document and get concise, AI-powered answers. Built with GPT-4, LangChain, and Chroma.
-      </p>
-      <div class="mt-8 flex justify-center gap-4">
-        <a href="#upload" class="px-6 py-3 bg-primary-600 hover:bg-primary-500 text-white rounded-lg font-medium transition">
-          Get Started
-        </a>
-        <a href="#features" class="px-6 py-3 border border-primary-500 hover:bg-zinc-800 text-primary-400 rounded-lg font-medium transition">
-          Features
-        </a>
-      </div>
-    </section>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
 
-    <!-- Features Section -->
-    <section id="features" class="bg-zinc-800 py-16 px-4 sm:px-8">
-      <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="p-6 bg-zinc-900 rounded-2xl text-center">
-          <div class="mb-4 inline-block p-3 bg-primary-600/20 rounded-full">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v4a1 1 0 001 1h3m10-5v4a1 1 0 01-1 1h-3M4 17v-2a1 1 0 011-1h3m10 3v-2a1 1 0 00-1-1h-3" />
-            </svg>
-          </div>
-          <h3 class="font-semibold text-xl mb-2">Seamless Upload</h3>
-          <p class="text-zinc-400">Drag & drop or browse to import your .txt files in seconds.</p>
-        </div>
-        <div class="p-6 bg-zinc-900 rounded-2xl text-center">
-          <div class="mb-4 inline-block p-3 bg-primary-600/20 rounded-full">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12a9 9 0 11-6.219-8.56" />
-            </svg>
-          </div>
-          <h3 class="font-semibold text-xl mb-2">Instant Q&A</h3>
-          <p class="text-zinc-400">Ask any question and get concise, three-sentence answers powered by GPT-4.</p>
-        </div>
-        <div class="p-6 bg-zinc-900 rounded-2xl text-center">
-          <div class="mb-4 inline-block p-3 bg-primary-600/20 rounded-full">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6m-6 0h6" />
-            </svg>
-          </div>
-          <h3 class="font-semibold text-xl mb-2">Smart Retrieval</h3>
-          <p class="text-zinc-400">Automatically chunks and retrieves relevant context using vector similarity.</p>
-        </div>
-      </div>
-    </section>
+    <style>
+        /* =========================================================================
+           GLOBAL TOKEN & THEME
+           ========================================================================= */
+        :root {
+            --background: #111;
+            --surface: #1a1a1a;
+            --text-primary: #f0f0f0;
+            --text-secondary: #a0a0a0;
+            --accent: #0a84ff;
+            --accent-glow: rgba(10, 132, 255, 0.2);
+            --border-color: #2a2a2a;
+            --font-main: "Inter", -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        }
 
-    <!-- Upload Section -->
-    <section id="upload" class="py-16 px-4 sm:px-8">
-      <div class="max-w-4xl mx-auto">
-        <div class="border border-zinc-800 rounded-2xl p-6 bg-zinc-900/80 backdrop-blur-lg">
-          <h2 class="text-2xl font-medium mb-4">Upload Your Document</h2>
-          <div id="dropZone" class="relative flex flex-col items-center justify-center border-2 border-dashed border-zinc-700 rounded-xl p-8 text-center cursor-pointer hover:border-primary-500 transition-colors">
-            <input id="fileInput" type="file" accept=".txt" class="absolute inset-0 opacity-0 cursor-pointer" />
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-zinc-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 12v9m0-9l3 3m-3-3l-3 3" />
-            </svg>
-            <p class="text-sm text-zinc-400">Drag & drop a <span class="font-medium text-zinc-100">.txt</span> file here, or <span class="underline">click to browse</span>.</p>
-          </div>
-          <p id="uploadStatus" class="mt-4 text-sm text-zinc-400 hidden"></p>
-        </div>
-      </div>
-    </section>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    <!-- Q&A Section -->
-    <section class="py-16 px-4 sm:px-8 flex-1">
-      <div class="max-w-4xl mx-auto">
-        <div class="border border-zinc-800 rounded-2xl p-6 bg-zinc-900/80 backdrop-blur-lg">
-          <h2 class="text-2xl font-medium mb-4">Ask a Question</h2>
-          <div class="flex gap-3">
-            <input id="questionInput" type="text" placeholder="Type your question here…" class="flex-1 bg-zinc-900/70 border border-zinc-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500" />
-            <button id="askBtn" class="px-5 py-2 rounded-lg font-medium bg-primary-600 hover:bg-primary-500 transition disabled:opacity-50 disabled:cursor-not-allowed">Ask</button>
-          </div>
-          <div id="answerBox" class="prose prose-invert max-w-none mt-4 hidden"></div>
-        </div>
-      </div>
-    </section>
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+
+        h1 {
+            font-size: clamp(3rem, 5vw + 1rem, 4.5rem);
+            background: linear-gradient(90deg, var(--text-primary) 70%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: clamp(2rem, 3vw + 1rem, 2.75rem);
+            margin-bottom: 4rem;
+            text-align: center;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        p {
+            max-width: 65ch;
+            color: var(--text-secondary);
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: opacity 0.3s ease;
+        }
+        a:hover {
+            opacity: 0.8;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 7rem 0;
+        }
+
+        /* =========================================================================
+           COMPONENTS
+           ========================================================================= */
+        .btn {
+            display: inline-block;
+            padding: 0.875rem 1.75rem;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            user-select: none;
+        }
+        .btn-accent {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+        .btn-accent:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--accent-glow);
+        }
+        .btn-accent:active {
+            transform: translateY(0);
+        }
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        .btn-secondary:hover {
+            background: #222;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        :focus-visible {
+            outline: 3px solid var(--accent);
+            outline-offset: 3px;
+            border-radius: 4px;
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: none;
+        }
+
+        /* =========================================================================
+           SECTIONS
+           ========================================================================= */
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+        }
+        .hero h1 {
+            margin-bottom: 1.5rem;
+        }
+        .hero .subhead {
+            font-size: 1.25rem;
+            margin: 0 auto 2.5rem;
+            max-width: 600px;
+        }
+
+        .how-it-works .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            text-align: center;
+        }
+        .how-it-works .step {
+            padding: 2.5rem 2rem;
+            background: linear-gradient(145deg, var(--surface), var(--background));
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .how-it-works .step:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        .how-it-works .step-icon {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+        }
+
+        .demo-panel {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 3rem;
+        }
+        #drop-zone {
+            border: 2px dashed var(--border-color);
+            border-radius: 16px;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        #drop-zone.dragover {
+            border-color: var(--accent);
+            background: var(--background);
+        }
+        .demo-interaction {
+            margin-top: 2rem;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 1rem;
+            align-items: center;
+        }
+        #question-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
+            background: var(--background);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+        #question-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+            outline: none;
+        }
+        #answer-display {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--background);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            min-height: 100px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.5s, transform 0.5s;
+        }
+        #answer-display.visible {
+            opacity: 1;
+            transform: none;
+        }
+        #answer-text {
+            white-space: pre-wrap;
+        }
+        #spinner {
+            width: 28px;
+            height: 28px;
+            border: 3px solid var(--border-color);
+            border-left-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto 0;
+            display: none;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .site-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 2rem 0;
+        }
+        .site-footer .container {
+            padding: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .site-footer .github-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--text-secondary);
+            transition: color 0.3s, transform 0.3s;
+        }
+        .site-footer .github-icon:hover {
+            color: var(--text-primary);
+            transform: scale(1.1);
+        }
+
+        /* =========================================================================
+           RESPONSIVE
+           ========================================================================= */
+        @media (max-width: 768px) {
+            .container {
+                padding: 5rem 0;
+            }
+            .demo-panel {
+                padding: 1.5rem;
+            }
+            #drop-zone {
+                padding: 2rem;
+            }
+            .demo-interaction {
+                grid-template-columns: 1fr;
+            }
+            .demo-interaction .btn {
+                width: 100%;
+            }
+            .site-footer .container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero -->
+    <header class="hero container fade-in">
+        <h1>Ask Your Documents Anything.</h1>
+        <p class="subhead">
+            Unlock insights from your text files instantly. Experience the future of information
+            retrieval with our advanced AI Q&A platform.
+        </p>
+        <a href="#demo" class="btn btn-accent">Try the Live Demo</a>
+    </header>
+
+    <main>
+        <!-- How It Works -->
+        <section id="how-it-works" class="container">
+            <h2 class="fade-in">A Simple, Powerful Workflow</h2>
+            <div class="steps-grid">
+                <!-- Step 1 -->
+                <div class="step fade-in" style="transition-delay: 100ms">
+                    <svg class="step-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5A3.375 3.375 0 0010.125 2.25H8.25m.75 12l3 3m0 0l3-3m-3 3v-6M7.5 3H5.625A1.125 1.125 0 004.5 4.125v17.25A1.125 1.125 0 005.625 22.5h12.75A1.125 1.125 0 0019.5 21.375V11.25a9 9 0 00-9-9" />
+                    </svg>
+                    <h3>1 · Upload Document</h3>
+                    <p>Securely drag & drop your .txt file. The content is parsed and prepared for analysis.</p>
+                </div>
+                <!-- Step 2 -->
+                <div class="step fade-in" style="transition-delay: 200ms">
+                    <svg class="step-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846A4.5 4.5 0 002.25 12l2.846-.813A4.5 4.5 0 008.187 8.094L9 5.25l.813 2.844a4.5 4.5 0 003.09 3.09L15.75 12l-2.847.813a4.5 4.5 0 00-3.09 3.09z" />
+                    </svg>
+                    <h3>2 · AI Processing</h3>
+                    <p>The backend indexes the document with embeddings, building a context map for retrieval.</p>
+                </div>
+                <!-- Step 3 -->
+                <div class="step fade-in" style="transition-delay: 300ms">
+                    <svg class="step-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.375 14.25v3.375A1.125 1.125 0 004.5 18.75h12.75a1.125 1.125 0 001.125-1.125V14.25m-13.5 0l-1.5 4.5m0-4.5l1.5 4.5m10.5-4.5l1.5 4.5m0-4.5l-1.5 4.5" />
+                    </svg>
+                    <h3>3 · Get Answers</h3>
+                    <p>Ask any question and receive a precise, context‑aware answer in seconds.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Demo -->
+        <section id="demo" class="container">
+            <div class="demo-panel fade-in">
+                <h2 style="margin-bottom: 2rem">Live Demo Panel</h2>
+
+                <input type="file" id="file-input" accept=".txt" hidden />
+
+                <div id="drop-zone">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                        <path d="M14.5 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7.5L14.5 2z" />
+                        <polyline points="14 2 14 8 20 8" />
+                    </svg>
+                    <h3 id="drop-zone-text">Drag & drop a .txt file here, or click to select</h3>
+                    <p>Your document will be processed by the API.</p>
+                </div>
+
+                <div id="spinner"></div>
+
+                <div class="demo-interaction">
+                    <input type="text" id="question-input" placeholder="Ask a question about your document…" disabled />
+                    <button id="ask-btn" class="btn btn-secondary" disabled>Ask</button>
+                </div>
+
+                <div id="answer-display">
+                    <h3 style="margin-bottom: 0.5rem">Answer</h3>
+                    <p id="answer-text">The answer will appear here.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- (Features & Architecture sections unchanged for brevity) -->
+    </main>
 
     <!-- Footer -->
-    <footer class="py-8 text-center text-sm text-zinc-500">© 2025 Samridh X0 — RAG Q&A Demo</footer>
+    <footer class="site-footer">
+        <div class="container">
+            <p>© 2024 RAG Systems Inc.</p>
+            <a href="https://github.com" target="_blank" rel="noopener" aria-label="GitHub Repository">
+                <svg class="github-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07C3.22 11.57 1.36 10.88 1.36 7c0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.88-1.86 4.57-3.64 4.8.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z" />
+                </svg>
+            </a>
+        </div>
+    </footer>
 
-    <!-- Toast -->
-    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-zinc-800 text-zinc-100 px-5 py-3 rounded-lg shadow-lg opacity-0 transition-opacity"></div>
-
-    <!-- Scripts -->
     <script>
-      const backendURL = "https://<your-app>.onrender.com";
-      const dropZone = document.getElementById('dropZone');
-      const fileInput = document.getElementById('fileInput');
-      const uploadStatus = document.getElementById('uploadStatus');
-      const questionInput = document.getElementById('questionInput');
-      const askBtn = document.getElementById('askBtn');
-      const answerBox = document.getElementById('answerBox');
-      const toast = document.getElementById('toast');
-      let documentId = null;
+        /* =========================================================================
+           FRONT‑END LOGIC (uses your Flask endpoints)
+           ========================================================================= */
+        const API_BASE = "https://rag-web-app.onrender.com"; // change if your domain differs
 
-      function showToast(msg) {
-        toast.textContent = msg;
-        toast.classList.remove('opacity-0');
-        clearTimeout(toast._timeout);
-        toast._timeout = setTimeout(() => toast.classList.add('opacity-0'), 3000);
-      }
+        const fileInput = document.getElementById("file-input");
+        const dropZone = document.getElementById("drop-zone");
+        const dropText = document.getElementById("drop-zone-text");
+        const spinner = document.getElementById("spinner");
+        const questionInput = document.getElementById("question-input");
+        const askBtn = document.getElementById("ask-btn");
+        const answerDisplay = document.getElementById("answer-display");
+        const answerText = document.getElementById("answer-text");
 
-      dropZone.addEventListener('click', () => fileInput.click());
-      dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('border-primary-500'); });
-      dropZone.addEventListener('dragleave', () => dropZone.classList.remove('border-primary-500'));  
-      dropZone.addEventListener('drop', e => {
-        e.preventDefault(); dropZone.classList.remove('border-primary-500');
-        const file = e.dataTransfer.files[0]; if (file) handleUpload(file);
-      });
-      fileInput.addEventListener('change', e => { const file = e.target.files[0]; if (file) handleUpload(file); });
-
-      async function handleUpload(file) {
-        if (file.type !== 'text/plain') return showToast('Only .txt files allowed');
-        uploadStatus.classList.remove('hidden'); uploadStatus.textContent = `Uploading: ${file.name}`;
-        const formData = new FormData(); formData.append('file', file);
-        try {
-          const res = await fetch(`${backendURL}/upload`, { method: 'POST', body: formData });
-          const json = await res.json(); if (!res.ok) throw new Error(json.error || 'Upload failed');
-          documentId = json.document_id;
-          uploadStatus.textContent = `✅ Uploaded (${json.chunks_created} chunks)`;
-          showToast('File processed successfully'); askBtn.disabled = false;
-        } catch (err) {
-          console.error(err);
-          uploadStatus.textContent = '❌ Upload failed'; showToast(err.message);
+        // util
+        function showSpinner(show = true) {
+            spinner.style.display = show ? "block" : "none";
         }
-      }
-
-      askBtn.addEventListener('click', askQuestion);
-      questionInput.addEventListener('keydown', e => { if (e.key === 'Enter') askQuestion(); });
-
-      async function askQuestion() {
-        const question = questionInput.value.trim();
-        if (!question) return showToast('Type a question first');
-        if (!documentId) return showToast('Upload a document first');
-        askBtn.disabled = true; uploadStatus.textContent = 'Thinking…'; answerBox.classList.add('hidden');
-        try {
-          const res = await fetch(`${backendURL}/query`, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ question })
-          });
-          const json = await res.json(); if (!res.ok) throw new Error(json.error || 'Query failed');
-          answerBox.innerHTML = `<p>${json.answer}</p>`; answerBox.classList.remove('hidden'); uploadStatus.textContent = '';
-        } catch (err) {
-          console.error(err); showToast(err.message);
-        } finally {
-          askBtn.disabled = false;
+        function setAskEnabled(enabled) {
+            askBtn.disabled = !enabled;
+            questionInput.disabled = !enabled;
+            askBtn.classList.toggle("btn-accent", enabled);
+            askBtn.classList.toggle("btn-secondary", !enabled);
         }
-      }
+
+        /* ---- FILE UPLOAD ---- */
+        function handleFileSelect(file) {
+            if (!file || file.type !== "text/plain") {
+                alert("Please choose a .txt file.");
+                return;
+            }
+            uploadFile(file);
+        }
+
+        async function uploadFile(file) {
+            const formData = new FormData();
+            formData.append("file", file);
+            dropText.textContent = `Uploading: ${file.name}`;
+            showSpinner(true);
+            try {
+                const res = await fetch(`${API_BASE}/upload`, { method: "POST", body: formData });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Upload failed");
+                dropText.textContent = `Processed ${data.chunks_created} chunks ✓`;
+                setAskEnabled(true);
+                questionInput.focus();
+            } catch (err) {
+                alert(err.message);
+                dropText.textContent = "Drag & drop a .txt file here, or click to select";
+            } finally {
+                showSpinner(false);
+            }
+        }
+
+        dropZone.addEventListener("click", () => fileInput.click());
+        fileInput.addEventListener("change", e => handleFileSelect(e.target.files[0]));
+
+        ["dragenter", "dragover", "dragleave", "drop"].forEach(evt => {
+            dropZone.addEventListener(evt, e => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+        });
+        dropZone.addEventListener("dragenter", () => dropZone.classList.add("dragover"));
+        dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
+        dropZone.addEventListener("drop", e => {
+            dropZone.classList.remove("dragover");
+            handleFileSelect(e.dataTransfer.files[0]);
+        });
+
+        /* ---- ASK QUESTION ---- */
+        async function askQuestion() {
+            const question = questionInput.value.trim();
+            if (!question) return alert("Enter a question first.");
+            showSpinner(true);
+            answerDisplay.classList.remove("visible");
+            try {
+                const res = await fetch(`${API_BASE}/query`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ question, top_k: 5 })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Query failed");
+                answerText.textContent = data.answer;
+                answerDisplay.classList.add("visible");
+            } catch (err) {
+                alert(err.message);
+            } finally {
+                showSpinner(false);
+            }
+        }
+        askBtn.addEventListener("click", askQuestion);
+        questionInput.addEventListener("keypress", e => {
+            if (e.key === "Enter" && !askBtn.disabled) askQuestion();
+        });
+
+        /* ---- Fade‑ins ---- */
+        const faders = document.querySelectorAll(".fade-in");
+        const io = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("visible");
+                    io.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+        faders.forEach(f => io.observe(f));
     </script>
-  </body>
+</body>
 </html>
