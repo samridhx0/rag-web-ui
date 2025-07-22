@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RAG Document Q&A Demo</title>
-    <!-- ░░ Tailwind ░░ -------------------------------------------------- -->
+    <title>RAG Document Q&A</title>
+    <!-- ░░ Tailwind ░░ -->
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <script>
       tailwind.config = {
@@ -25,13 +25,13 @@
                 900: '#312e81'
               }
             },
-            fontFamily: {
-              sans: ['Inter', 'ui-sans-serif', 'system-ui']
-            }
+            fontFamily: { sans: ['Inter','ui-sans-serif','system-ui'] }
           }
         }
       }
     </script>
+    <!-- Markdown renderer -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -51,14 +51,14 @@
       </button>
     </header>
 
-    <main class="flex-1 flex flex-col gap-8 p-4 sm:p-8 max-w-5xl w-full mx-auto">
+    <main class="flex-1 flex flex-col gap-10 p-4 sm:p-8 max-w-4xl w-full mx-auto">
       <!-- ░░ Upload Card ░░ -->
       <section class="border border-zinc-800 rounded-2xl p-6 bg-gradient-to-br from-zinc-900/80 to-zinc-800/60 backdrop-blur-lg">
         <h2 class="text-xl font-medium mb-4 flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
-          Upload .txt Document
+          Upload Document
         </h2>
         <div id="dropZone" class="relative flex flex-col items-center justify-center border-2 border-dashed border-zinc-700 rounded-xl p-8 text-center cursor-pointer hover:border-primary-500 transition-colors">
           <input id="fileInput" type="file" accept=".txt,.pdf,.csv,.json,.docx,.doc,.md" class="absolute inset-0 opacity-0 cursor-pointer" />
@@ -66,9 +66,12 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 12v9m0-9l3 3m-3-3l-3 3m6-10v2a2 2 0 002 2h2l-4-4z" />
           </svg>
           <p class="text-sm text-zinc-400">
-            Drag & drop a <span class="text-zinc-100 font-medium">.txt, .pdf, .csv, .json, .docx, or .md</span> file here, or …
-            <span class="underline">click to browse</span>.
+            Drag & drop a <span class="text-zinc-100 font-medium">.txt, .pdf, .csv, .json, .docx, .doc, or .md</span> file here, or <span class="underline">click to browse</span>.
           </p>
+        </div>
+        <!-- Progress bar -->
+        <div class="w-full h-2 bg-zinc-700 rounded mt-4 hidden" id="progressWrap">
+          <div id="progressBar" class="h-2 bg-primary-500 rounded" style="width:0%"></div>
         </div>
         <div id="uploadStatus" class="mt-4 text-sm text-zinc-400 hidden"></div>
       </section>
@@ -88,6 +91,14 @@
           </button>
         </div>
         <div id="answerBox" class="prose prose-invert max-w-none leading-relaxed mt-4 hidden"></div>
+        <!-- copy + citation toggle -->
+        <div id="answerActions" class="flex items-center gap-4 mt-2 hidden">
+          <button id="copyBtn" class="px-3 py-1 text-xs bg-zinc-800 rounded hover:bg-zinc-700">Copy answer</button>
+          <details id="sourceWrap" class="text-xs cursor-pointer select-none">
+            <summary class="list-none text-primary-400">Show sources</summary>
+            <ul id="sourceList" class="list-disc pl-6 mt-2"></ul>
+          </details>
+        </div>
       </section>
     </main>
 
@@ -100,16 +111,20 @@
       const dropZone = document.getElementById('dropZone');
       const fileInput = document.getElementById('fileInput');
       const uploadStatus = document.getElementById('uploadStatus');
+      const progressWrap = document.getElementById('progressWrap');
+      const progressBar = document.getElementById('progressBar');
       const questionInput = document.getElementById('questionInput');
       const askBtn = document.getElementById('askBtn');
       const answerBox = document.getElementById('answerBox');
+      const answerActions = document.getElementById('answerActions');
+      const copyBtn = document.getElementById('copyBtn');
+      const sourceWrap = document.getElementById('sourceWrap');
+      const sourceList = document.getElementById('sourceList');
       const toast = document.getElementById('toast');
       let documentId = null;
 
       /* ─── Theme toggle ───────────────────────────────────── */
-      const themeToggle = document.getElementById('themeToggle');
-      const themeIcon = document.getElementById('themeIcon');
-      themeToggle.addEventListener('click', () => {
+      document.getElementById('themeToggle').addEventListener('click', () => {
         document.documentElement.classList.toggle('dark');
       });
 
@@ -124,16 +139,11 @@
       }
 
       /* ─── Drag & drop handlers ───────────────────────────── */
-      ['dragover', 'dragenter'].forEach(eventName => {
-        dropZone.addEventListener(eventName, e => {
-          e.preventDefault();
-          dropZone.classList.add('border-primary-500');
-        });
+      ['dragover', 'dragenter'].forEach(evt => {
+        dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.add('border-primary-500'); });
       });
-      ['dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, e => {
-          dropZone.classList.remove('border-primary-500');
-        });
+      ['dragleave', 'drop'].forEach(evt => {
+        dropZone.addEventListener(evt, () => dropZone.classList.remove('border-primary-500'));
       });
       dropZone.addEventListener('drop', e => {
         e.preventDefault();
@@ -144,43 +154,54 @@
       });
       fileInput.addEventListener('change', handleUpload);
 
-      /* ─── Upload logic ───────────────────────────────────── */
-      async function handleUpload() {
+      /* ─── Upload logic with progress ─────────────────────── */
+      function handleUpload() {
         const file = fileInput.files[0];
         if (!file) return;
         uploadStatus.classList.remove('hidden');
         uploadStatus.textContent = `Uploading: ${file.name}`;
+        progressWrap.classList.remove('hidden');
+        progressBar.style.width = '0%';
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `${backendURL}/upload`);
+        xhr.upload.onprogress = e => {
+          if (e.lengthComputable) {
+            const percent = (e.loaded / e.total) * 100;
+            progressBar.style.width = `${percent}%`;
+          }
+        };
+        xhr.onload = () => {
+          progressBar.style.width = '100%';
+          if (xhr.status === 200) {
+            const json = JSON.parse(xhr.responseText);
+            documentId = json.document_id;
+            uploadStatus.textContent = `✅ Uploaded & processed (${json.chunks_created} chunks)`;
+            showToast('File processed successfully', 'success');
+          } else {
+            showToast(JSON.parse(xhr.responseText).error || 'Upload failed', 'error');
+            uploadStatus.textContent = '❌ Upload failed';
+          }
+        };
         const form = new FormData();
         form.append('file', file);
-        try {
-          const res = await fetch(`${backendURL}/upload`, { method: 'POST', body: form });
-          if (!res.ok) throw new Error((await res.json()).error || 'Upload failed');
-          const json = await res.json();
-          documentId = json.document_id;
-          uploadStatus.textContent = `✅ Uploaded & processed (${json.chunks_created} chunks)`;
-          showToast('File processed successfully', 'success');
-        } catch (err) {
-          console.error(err);
-          uploadStatus.textContent = '❌ Upload failed';
-          showToast(err.message || 'Upload failed', 'error');
-        }
+        xhr.send(form);
       }
 
       /* ─── Query logic ────────────────────────────────────── */
       askBtn.addEventListener('click', queryDocument);
-      questionInput.addEventListener('keydown', e => {
-        if (e.key === 'Enter') queryDocument();
-      });
+      questionInput.addEventListener('keydown', e => { if (e.key === 'Enter') queryDocument(); });
+
       async function queryDocument() {
         const question = questionInput.value.trim();
         if (!question) return;
-        if (!documentId) {
-          showToast('Upload a document first', 'error');
-          return;
-        }
-        askBtn.disabled = true;
-        askBtn.textContent = '…';
+        if (!documentId) return showToast('Upload a document first', 'error');
+
+        askBtn.disabled = true; askBtn.textContent = '…';
         answerBox.classList.add('hidden');
+        answerActions.classList.add('hidden');
+        sourceWrap.open = false;
+
         try {
           const res = await fetch(`${backendURL}/query`, {
             method: 'POST',
@@ -189,14 +210,28 @@
           });
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || 'Query failed');
-          answerBox.innerHTML = data.answer;
+
+          // Markdown render
+          answerBox.innerHTML = marked.parse(data.answer);
           answerBox.classList.remove('hidden');
+
+          // sources (array of strings) optional
+          if (data.sources && data.sources.length) {
+            sourceList.innerHTML = data.sources.map(s => `<li>${s}</li>`).join('');
+            answerActions.classList.remove('hidden');
+          } else {
+            answerActions.classList.remove('hidden');
+            sourceWrap.classList.add('hidden');
+          }
+
+          copyBtn.onclick = () => {
+            navigator.clipboard.writeText(answerBox.textContent).then(() => showToast('Copied!', 'success'));
+          };
         } catch (err) {
           console.error(err);
           showToast(err.message || 'Query failed', 'error');
         } finally {
-          askBtn.disabled = false;
-          askBtn.textContent = 'Ask';
+          askBtn.disabled = false; askBtn.textContent = 'Ask';
         }
       }
     </script>
