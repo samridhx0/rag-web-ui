@@ -4,147 +4,192 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RAG Document Q&A</title>
-    <!-- ░░ Tailwind ░░ -->
-    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com?plugins=typography,forms"></script>
     <script>
       tailwind.config = {
         darkMode: 'class',
         theme: {
           extend: {
             colors: {
-              primary: {
-                50: '#eef2ff',
-                100: '#e0e7ff',
-                200: '#c7d2fe',
-                300: '#a5b4fc',
-                400: '#818cf8',
-                500: '#6366f1',
-                600: '#4f46e5',
-                700: '#4338ca',
-                800: '#3730a3',
-                900: '#312e81'
-              }
+              primary: { 500: '#6366f1', 600: '#4f46e5' },
             },
-            fontFamily: { sans: ['Inter','ui-sans-serif','system-ui'] }
-          }
-        }
-      }
+            fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          },
+        },
+      };
     </script>
-    <!-- Markdown renderer -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- Google Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Markdown renderer -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Hero icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
   </head>
 
-  <body class="h-full flex flex-col">
-    <!-- ░░ Header ░░ -->
-    <header class="py-6 px-4 sm:px-8 flex items-center justify-between bg-zinc-900 shadow-xl shadow-black/30">
-      <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-        RAG Document Q&A
-      </h1>
-      <button id="themeToggle" class="p-2 rounded-lg hover:bg-zinc-700 transition-colors" title="Toggle Dark / Light">
-        <svg id="themeIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M12 3v1m0 16v1m8.66-12l-.71.71M4.05 19.95l-.71-.71M21 12h-1M4 12H3m16.66 4.95l-.71-.71M4.05 4.05l-.71.71M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-        </svg>
-      </button>
-    </header>
+  <body class="flex flex-col min-h-full">
+    <!-- ── Hero ─────────────────────────────────────────────────── -->
+    <section class="relative isolate overflow-hidden bg-zinc-900 py-20">
+      <svg class="absolute inset-0 -z-10 h-full w-full" aria-hidden="true">
+        <defs>
+          <radialGradient id="bgGradient" cx="50%" cy="50%" r="75%">
+            <stop offset="0%" stop-color="#5b5be4" stop-opacity=".3" />
+            <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+          </radialGradient>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#bgGradient)" />
+      </svg>
 
-    <main class="flex-1 flex flex-col gap-10 p-4 sm:p-8 max-w-4xl w-full mx-auto">
-      <!-- ░░ Upload Card ░░ -->
-      <section class="border border-zinc-800 rounded-2xl p-6 bg-gradient-to-br from-zinc-900/80 to-zinc-800/60 backdrop-blur-lg">
-        <h2 class="text-xl font-medium mb-4 flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-          Upload Document
-        </h2>
-        <div id="dropZone" class="relative flex flex-col items-center justify-center border-2 border-dashed border-zinc-700 rounded-xl p-8 text-center cursor-pointer hover:border-primary-500 transition-colors">
-          <input id="fileInput" type="file" accept=".txt,.pdf,.csv,.json,.docx,.doc,.md" class="absolute inset-0 opacity-0 cursor-pointer" />
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-zinc-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 12v9m0-9l3 3m-3-3l-3 3m6-10v2a2 2 0 002 2h2l-4-4z" />
-          </svg>
-          <p class="text-sm text-zinc-400">
-            Drag & drop a <span class="text-zinc-100 font-medium">.txt, .pdf, .csv, .json, .docx, .doc, or .md</span> file here, or <span class="underline">click to browse</span>.
-          </p>
+      <div class="max-w-4xl px-6 lg:px-8 mx-auto text-center">
+        <h1 class="text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+          RAG Document Q&A
+        </h1>
+        <p class="mt-4 text-lg text-zinc-400">
+          Upload a document, ask questions, get context-aware answers.
+        </p>
+      </div>
+    </section>
+
+    <!-- ── Main content wrapper ─────────────────────────────────── -->
+    <main class="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-8 py-10 flex flex-col gap-10">
+
+      <!-- Upload Card -->
+      <section class="rounded-3xl border border-zinc-800 bg-zinc-900/60 backdrop-blur-md shadow-xl shadow-black/30">
+        <div class="p-6 sm:p-8">
+          <h2 class="text-xl font-semibold flex items-center gap-2">
+            <i data-feather="upload" class="w-5 h-5 text-primary-500"></i>
+            Upload Document
+          </h2>
+
+          <div
+            id="dropZone"
+            class="relative mt-6 flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-zinc-700 p-10 transition-colors">
+            <input
+              id="fileInput"
+              type="file"
+              accept=".txt,.pdf,.csv,.json,.docx,.doc,.md"
+              class="absolute inset-0 cursor-pointer opacity-0"
+            />
+            <i data-feather="file-plus" class="h-14 w-14 text-zinc-500 mb-4 transition-transform duration-200" id="dropIcon"></i>
+            <p class="text-sm text-zinc-400">
+              Drag & drop a
+              <span class="font-medium text-zinc-100">.txt, .pdf, .csv, .json, .docx, .doc,</span> or
+              <span class="font-medium text-zinc-100">.md</span> file here, or
+              <span class="underline">click to browse</span>.
+            </p>
+
+            <div class="w-full h-2 bg-zinc-800 rounded mt-6 invisible" id="progressWrap">
+              <div id="progressBar" class="h-2 bg-primary-500 rounded" style="width:0%"></div>
+            </div>
+          </div>
+
+          <p id="uploadStatus" class="mt-4 text-sm text-zinc-400 hidden"></p>
         </div>
-        <!-- Progress bar -->
-        <div class="w-full h-2 bg-zinc-700 rounded mt-4 hidden" id="progressWrap">
-          <div id="progressBar" class="h-2 bg-primary-500 rounded" style="width:0%"></div>
-        </div>
-        <div id="uploadStatus" class="mt-4 text-sm text-zinc-400 hidden"></div>
       </section>
 
-      <!-- ░░ Q&A Card ░░ -->
-      <section class="border border-zinc-800 rounded-2xl p-6 bg-gradient-to-br from-zinc-900/80 to-zinc-800/60 backdrop-blur-lg flex flex-col gap-4">
-        <h2 class="text-xl font-medium mb-2 flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12a9 9 0 11-6.219-8.56" />
-          </svg>
-          Ask a Question
-        </h2>
-        <div class="flex gap-3">
-          <input id="questionInput" type="text" placeholder="Ask something about your document…" class="flex-1 bg-zinc-900/70 border border-zinc-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500" />
-          <button id="askBtn" class="px-5 py-2 rounded-lg font-medium bg-primary-600 hover:bg-primary-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-            Ask
-          </button>
-        </div>
-        <div id="answerBox" class="prose prose-invert max-w-none leading-relaxed mt-4 hidden"></div>
-        <!-- copy + citation toggle -->
-        <div id="answerActions" class="flex items-center gap-4 mt-2 hidden">
-          <button id="copyBtn" class="px-3 py-1 text-xs bg-zinc-800 rounded hover:bg-zinc-700">Copy answer</button>
-          <details id="sourceWrap" class="text-xs cursor-pointer select-none">
-            <summary class="list-none text-primary-400">Show sources</summary>
-            <ul id="sourceList" class="list-disc pl-6 mt-2"></ul>
-          </details>
+      <!-- Q&A Card -->
+      <section class="rounded-3xl border border-zinc-800 bg-zinc-900/60 backdrop-blur-md shadow-xl shadow-black/30 flex flex-col">
+        <div class="p-6 sm:p-8 flex-1 flex flex-col">
+          <h2 class="text-xl font-semibold flex items-center gap-2">
+            <i data-feather="message-circle" class="w-5 h-5 text-primary-500"></i>
+            Ask a Question
+          </h2>
+
+          <div class="mt-6 flex gap-3">
+            <input
+              id="questionInput"
+              type="text"
+              placeholder="Ask something…"
+              class="flex-1 rounded-lg border border-zinc-700 bg-zinc-800/70 px-4 py-2 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+            <button
+              id="askBtn"
+              class="rounded-lg bg-primary-600 px-5 py-2 font-medium transition-colors hover:bg-primary-500 disabled:opacity-50 disabled:cursor-not-allowed">
+              Ask
+            </button>
+          </div>
+
+          <!-- Answer output -->
+          <div id="answerBox" class="prose prose-invert max-w-none leading-relaxed mt-6 hidden"></div>
+
+          <!-- Copy & sources -->
+          <div class="flex items-center gap-4 mt-4 hidden" id="answerMeta">
+            <button
+              id="copyBtn"
+              class="rounded bg-zinc-800 px-3 py-1 text-xs hover:bg-zinc-700 transition-colors">
+              Copy
+            </button>
+            <details>
+              <summary class="cursor-pointer text-xs text-primary-400">Sources</summary>
+              <ul id="sourceList" class="ml-6 mt-2 list-disc text-xs"></ul>
+            </details>
+          </div>
         </div>
       </section>
     </main>
 
-    <!-- ░░ Toast ░░ -->
-    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-zinc-800 text-zinc-100 px-5 py-3 rounded-lg shadow-lg shadow-black/40 pointer-events-none opacity-0 transition-all"></div>
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 select-none pointer-events-none opacity-0 transition"></div>
 
-    <!-- ░░ Scripts ░░ -->
+    <!-- Theme Toggle -->
+    <button
+      id="themeToggle"
+      class="fixed bottom-6 right-6 rounded-full bg-zinc-800 p-3 shadow-md shadow-black/20 backdrop-blur hover:bg-zinc-700 transition">
+      <i id="themeIcon" data-feather="sun" class="w-5 h-5"></i>
+    </button>
+
+    <!-- ── Scripts ──────────────────────────────────────────────── -->
     <script>
+      /* === Config === */
       const backendURL = "https://rag-web-app.onrender.com";
-      const dropZone = document.getElementById('dropZone');
-      const fileInput = document.getElementById('fileInput');
-      const uploadStatus = document.getElementById('uploadStatus');
-      const progressWrap = document.getElementById('progressWrap');
-      const progressBar = document.getElementById('progressBar');
+
+      /* === Elements === */
+      const dropZone      = document.getElementById('dropZone');
+      const fileInput     = document.getElementById('fileInput');
+      const progressWrap  = document.getElementById('progressWrap');
+      const progressBar   = document.getElementById('progressBar');
+      const uploadStatus  = document.getElementById('uploadStatus');
       const questionInput = document.getElementById('questionInput');
-      const askBtn = document.getElementById('askBtn');
-      const answerBox = document.getElementById('answerBox');
-      const answerActions = document.getElementById('answerActions');
-      const copyBtn = document.getElementById('copyBtn');
-      const sourceWrap = document.getElementById('sourceWrap');
-      const sourceList = document.getElementById('sourceList');
-      const toast = document.getElementById('toast');
+      const askBtn        = document.getElementById('askBtn');
+      const answerBox     = document.getElementById('answerBox');
+      const answerMeta    = document.getElementById('answerMeta');
+      const copyBtn       = document.getElementById('copyBtn');
+      const sourceList    = document.getElementById('sourceList');
+      const toast         = document.getElementById('toast');
+      const dropIcon      = document.getElementById('dropIcon');
+
+      /* === State === */
       let documentId = null;
 
-      /* ─── Theme toggle ───────────────────────────────────── */
-      document.getElementById('themeToggle').addEventListener('click', () => {
-        document.documentElement.classList.toggle('dark');
-      });
-
-      /* ─── Toast util ─────────────────────────────────────── */
-      function showToast(message, variant = 'neutral') {
-        toast.textContent = message;
-        toast.className = `fixed bottom-6 left-1/2 -translate-x-1/2 px-5 py-3 rounded-lg shadow-lg pointer-events-none transition-all opacity-0 bg-zinc-800`;
-        if (variant === 'success') toast.classList.add('bg-emerald-600');
-        if (variant === 'error') toast.classList.add('bg-rose-600');
-        setTimeout(() => (toast.style.opacity = '1'), 10);
+      /* === Toast util === */
+      function showToast(msg, variant = 'neutral') {
+        toast.textContent = msg;
+        toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 pointer-events-none px-5 py-3 rounded-lg shadow-lg transition';
+        const colorMap = { success: 'bg-emerald-600', error: 'bg-rose-600', neutral: 'bg-zinc-800' };
+        toast.classList.add(colorMap[variant]);
+        toast.style.opacity = '1';
         setTimeout(() => (toast.style.opacity = '0'), 3000);
       }
 
-      /* ─── Drag & drop handlers ───────────────────────────── */
-      ['dragover', 'dragenter'].forEach(evt => {
-        dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.add('border-primary-500'); });
-      });
-      ['dragleave', 'drop'].forEach(evt => {
-        dropZone.addEventListener(evt, () => dropZone.classList.remove('border-primary-500'));
-      });
+      /* === Drag animations === */
+      ['dragenter', 'dragover'].forEach(evt =>
+        dropZone.addEventListener(evt, e => {
+          e.preventDefault();
+          dropZone.classList.add('border-primary-500');
+          dropIcon.classList.add('animate-bounce');
+        })
+      );
+      ['dragleave', 'drop'].forEach(evt =>
+        dropZone.addEventListener(evt, e => {
+          dropZone.classList.remove('border-primary-500');
+          dropIcon.classList.remove('animate-bounce');
+        })
+      );
       dropZone.addEventListener('drop', e => {
         e.preventDefault();
         if (e.dataTransfer.files.length) {
@@ -154,86 +199,113 @@
       });
       fileInput.addEventListener('change', handleUpload);
 
-      /* ─── Upload logic with progress ─────────────────────── */
+      /* === Upload logic === */
       function handleUpload() {
         const file = fileInput.files[0];
         if (!file) return;
+
+        progressWrap.classList.remove('invisible');
+        progressBar.style.width = '0%';
         uploadStatus.classList.remove('hidden');
         uploadStatus.textContent = `Uploading: ${file.name}`;
-        progressWrap.classList.remove('hidden');
-        progressBar.style.width = '0%';
 
         const xhr = new XMLHttpRequest();
         xhr.open('POST', `${backendURL}/upload`);
         xhr.upload.onprogress = e => {
           if (e.lengthComputable) {
             const percent = (e.loaded / e.total) * 100;
-            progressBar.style.width = `${percent}%`;
+            progressBar.style.width = percent.toFixed(1) + '%';
           }
         };
         xhr.onload = () => {
-          progressBar.style.width = '100%';
           if (xhr.status === 200) {
             const json = JSON.parse(xhr.responseText);
             documentId = json.document_id;
-            uploadStatus.textContent = `✅ Uploaded & processed (${json.chunks_created} chunks)`;
-            showToast('File processed successfully', 'success');
+            uploadStatus.textContent = `✅ Processed (${json.chunks_created} chunks)`;
+            showToast('File processed', 'success');
           } else {
-            showToast(JSON.parse(xhr.responseText).error || 'Upload failed', 'error');
+            const err = JSON.parse(xhr.responseText).error || 'Upload failed';
             uploadStatus.textContent = '❌ Upload failed';
+            showToast(err, 'error');
           }
+        };
+        xhr.onerror = () => {
+          uploadStatus.textContent = '❌ Upload failed';
+          showToast('Upload failed', 'error');
         };
         const form = new FormData();
         form.append('file', file);
         xhr.send(form);
       }
 
-      /* ─── Query logic ────────────────────────────────────── */
-      askBtn.addEventListener('click', queryDocument);
-      questionInput.addEventListener('keydown', e => { if (e.key === 'Enter') queryDocument(); });
+      /* === Query logic === */
+      askBtn.addEventListener('click', queryDoc);
+      questionInput.addEventListener('keydown', e => e.key === 'Enter' && queryDoc());
 
-      async function queryDocument() {
-        const question = questionInput.value.trim();
-        if (!question) return;
+      async function queryDoc() {
+        const q = questionInput.value.trim();
+        if (!q) return;
         if (!documentId) return showToast('Upload a document first', 'error');
 
-        askBtn.disabled = true; askBtn.textContent = '…';
+        askBtn.disabled = true;
+        askBtn.textContent = '…';
         answerBox.classList.add('hidden');
-        answerActions.classList.add('hidden');
-        sourceWrap.open = false;
+        answerMeta.classList.add('hidden');
 
         try {
           const res = await fetch(`${backendURL}/query`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ question })
+            body: JSON.stringify({ question: q })
           });
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || 'Query failed');
 
-          // Markdown render
-          answerBox.innerHTML = marked.parse(data.answer);
+          answerBox.innerHTML = marked.parse(data.answer || '');
           answerBox.classList.remove('hidden');
 
-          // sources (array of strings) optional
           if (data.sources && data.sources.length) {
             sourceList.innerHTML = data.sources.map(s => `<li>${s}</li>`).join('');
-            answerActions.classList.remove('hidden');
-          } else {
-            answerActions.classList.remove('hidden');
-            sourceWrap.classList.add('hidden');
+            answerMeta.classList.remove('hidden');
           }
 
-          copyBtn.onclick = () => {
-            navigator.clipboard.writeText(answerBox.textContent).then(() => showToast('Copied!', 'success'));
-          };
         } catch (err) {
-          console.error(err);
           showToast(err.message || 'Query failed', 'error');
         } finally {
-          askBtn.disabled = false; askBtn.textContent = 'Ask';
+          askBtn.disabled = false;
+          askBtn.textContent = 'Ask';
         }
       }
+
+      /* === Copy answer === */
+      copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(answerBox.textContent).then(() => showToast('Copied!', 'success'));
+      });
+
+      /* === Theme toggle === */
+      const themeToggle = document.getElementById('themeToggle');
+      const themeIcon   = document.getElementById('themeIcon');
+      const storedTheme = localStorage.getItem('theme') || 'system';
+
+      const applyTheme = mode => {
+        const root = document.documentElement;
+        if (mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches))
+          root.classList.add('dark');
+        else root.classList.remove('dark');
+        themeIcon.setAttribute('data-feather', root.classList.contains('dark') ? 'sun' : 'moon');
+        feather.replace();
+      };
+      applyTheme(storedTheme);
+
+      themeToggle.addEventListener('click', () => {
+        const current = localStorage.getItem('theme') || 'system';
+        const next = current === 'light' ? 'dark' : current === 'dark' ? 'system' : 'light';
+        localStorage.setItem('theme', next);
+        applyTheme(next);
+      });
+
+      /* Feather icon refresh */
+      feather.replace();
     </script>
   </body>
 </html>
