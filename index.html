@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RAG Document Q&A</title>
+    <title>RAG Document Q&A — Revamped</title>
 
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com?plugins=typography,forms"></script>
@@ -13,9 +13,15 @@
         theme: {
           extend: {
             colors: {
-              primary: { 500: '#6366f1', 600: '#4f46e5' },
+              primary: { 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' },
+              success: { 500: '#10b981' },
+              danger:  { 500: '#ef4444' },
+              warn:    { 500: '#f59e0b' },
             },
             fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+            boxShadow: {
+              glow: '0 0 0 1px rgba(99,102,241,0.3), 0 8px 40px rgba(99,102,241,0.15)'
+            }
           },
         },
       };
@@ -28,36 +34,79 @@
 
     <!-- Markdown renderer -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- Hero icons -->
+    <!-- Hero icons (feather) -->
     <script src="https://unpkg.com/feather-icons"></script>
+
+    <style>
+      @media (prefers-reduced-motion: no-preference) {
+        .floating-dots::after { content: '\2026'; animation: ellipsis 1.2s infinite steps(4, end); }
+        @keyframes ellipsis { to { width: 1em; } }
+      }
+      .scrollbar-thin::-webkit-scrollbar { height: 8px; width: 8px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 9999px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: #18181b; }
+    </style>
   </head>
 
-  <body class="flex flex-col min-h-full">
-    <!-- ── Hero ─────────────────────────────────────────────────── -->
-    <section class="relative isolate overflow-hidden bg-zinc-900 py-20">
+  <body class="flex min-h-full flex-col">
+    <!-- Header -->
+    <header class="sticky top-0 z-40 backdrop-blur bg-zinc-950/70 border-b border-zinc-800">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6 h-14 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="h-7 w-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 grid place-items-center shadow-glow">
+            <i data-feather="cpu" class="w-4 h-4"></i>
+          </div>
+          <span class="font-semibold tracking-tight">RAG Document Q&A</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="exportBtn" class="hidden sm:inline-flex items-center gap-2 rounded-lg border border-zinc-700 px-3 py-1.5 text-sm hover:bg-zinc-800 transition focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <i data-feather="download" class="w-4 h-4"></i>
+            Export chat
+          </button>
+          <button id="themeToggle" class="rounded-full bg-zinc-800 p-2 hover:bg-zinc-700 transition" aria-label="Toggle theme">
+            <i id="themeIcon" data-feather="sun" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="relative isolate overflow-hidden bg-zinc-900 py-14">
       <svg class="absolute inset-0 -z-10 h-full w-full" aria-hidden="true">
         <defs>
           <radialGradient id="bgGradient" cx="50%" cy="50%" r="75%">
-            <stop offset="0%" stop-color="#5b5be4" stop-opacity=".3" />
+            <stop offset="0%" stop-color="#5b5be4" stop-opacity=".28" />
             <stop offset="100%" stop-color="#000000" stop-opacity="0" />
           </radialGradient>
         </defs>
         <rect width="100%" height="100%" fill="url(#bgGradient)" />
       </svg>
-
-      <div class="max-w-4xl px-6 lg:px-8 mx-auto text-center">
-        <h1 class="text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-          RAG Document Q&A
-        </h1>
-        <p class="mt-4 text-lg text-zinc-400">
-          Upload a document, ask questions, get context-aware answers.
-        </p>
+      <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        <div class="text-center">
+          <h1 class="text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            Ask smarter. Get grounded answers.
+          </h1>
+          <p class="mt-3 text-zinc-400">Upload a document, ask questions, and receive context‑aware answers with sources.</p>
+        </div>
+        <ol class="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <li class="flex items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-3">
+            <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-600/20 text-indigo-300 text-sm font-semibold">1</span>
+            <span class="text-sm text-zinc-300">Drop your file</span>
+          </li>
+          <li class="flex items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-3">
+            <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-600/20 text-indigo-300 text-sm font-semibold">2</span>
+            <span class="text-sm text-zinc-300">Ask a question</span>
+          </li>
+          <li class="flex items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-3">
+            <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-600/20 text-indigo-300 text-sm font-semibold">3</span>
+            <span class="text-sm text-zinc-300">Review answer & sources</span>
+          </li>
+        </ol>
       </div>
     </section>
 
-    <!-- ── Main content wrapper ─────────────────────────────────── -->
-    <main class="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-8 py-10 flex flex-col gap-10">
-
+    <!-- Main -->
+    <main class="w-full max-w-6xl mx-auto px-4 sm:px-6 py-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
       <!-- Upload Card -->
       <section class="rounded-3xl border border-zinc-800 bg-zinc-900/60 backdrop-blur-md shadow-xl shadow-black/30">
         <div class="p-6 sm:p-8">
@@ -66,87 +115,90 @@
             Upload Document
           </h2>
 
-          <div
-            id="dropZone"
-            class="relative mt-6 flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-zinc-700 p-10 transition-colors">
-            <input
-              id="fileInput"
-              type="file"
-              accept=".txt,.pdf,.csv,.json,.docx,.doc,.md"
-              class="absolute inset-0 cursor-pointer opacity-0"
-            />
+          <div id="dropZone" class="relative mt-6 flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-zinc-700 p-10 transition-colors outline-none" tabindex="0" aria-label="File drop zone" role="button">
+            <input id="fileInput" type="file" accept=".txt,.pdf,.csv,.json,.docx,.doc,.md" class="absolute inset-0 cursor-pointer opacity-0" aria-label="Choose a file" />
             <i data-feather="file-plus" class="h-14 w-14 text-zinc-500 mb-4 transition-transform duration-200" id="dropIcon"></i>
-            <p class="text-sm text-zinc-400">
-              Drag & drop a
-              <span class="font-medium text-zinc-100">.txt, .pdf, .csv, .json, .docx, .doc,</span> or
-              <span class="font-medium text-zinc-100">.md</span> file here, or
-              <span class="underline">click to browse</span>.
+            <p class="text-sm text-zinc-400 text-center">
+              Drag & drop a <span class="font-medium text-zinc-100">.txt, .pdf, .csv, .json, .docx, .doc,</span> or <span class="font-medium text-zinc-100">.md</span> file here,
+              or <span class="underline">click to browse</span>.
             </p>
+            <p class="mt-2 text-xs text-zinc-500">Tip: press <kbd class="rounded border border-zinc-700 bg-zinc-800 px-1">U</kbd> to open file dialog.</p>
 
-            <div class="w-full h-2 bg-zinc-800 rounded mt-6 invisible" id="progressWrap">
+            <div class="w-full h-2 bg-zinc-800 rounded mt-6 invisible" id="progressWrap" aria-hidden="true">
               <div id="progressBar" class="h-2 bg-primary-500 rounded" style="width:0%"></div>
             </div>
           </div>
 
-          <p id="uploadStatus" class="mt-4 text-sm text-zinc-400 hidden"></p>
+          <div id="fileMeta" class="mt-5 hidden">
+            <div class="flex items-start justify-between gap-3 rounded-xl border border-zinc-800 bg-zinc-900/70 p-4">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="h-10 w-10 rounded-lg bg-zinc-800 grid place-items-center">
+                  <i data-feather="file-text" class="w-5 h-5 text-zinc-300"></i>
+                </div>
+                <div class="min-w-0">
+                  <p id="fileName" class="truncate font-medium">—</p>
+                  <p id="fileInfo" class="text-xs text-zinc-400">—</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="fileStatusBadge" class="inline-flex items-center gap-1 rounded-full border border-zinc-700 bg-zinc-800 px-2 py-0.5 text-xs text-zinc-300">Pending</span>
+                <button id="replaceBtn" class="rounded-lg border border-zinc-700 px-2.5 py-1 text-xs hover:bg-zinc-800">Replace</button>
+              </div>
+            </div>
+            <p id="uploadStatus" class="mt-3 text-sm text-zinc-400">—</p>
+          </div>
         </div>
       </section>
 
       <!-- Q&A Card -->
       <section class="rounded-3xl border border-zinc-800 bg-zinc-900/60 backdrop-blur-md shadow-xl shadow-black/30 flex flex-col">
         <div class="p-6 sm:p-8 flex-1 flex flex-col">
-          <h2 class="text-xl font-semibold flex items-center gap-2">
-            <i data-feather="message-circle" class="w-5 h-5 text-primary-500"></i>
-            Ask a Question
-          </h2>
-
-          <div class="mt-6 flex gap-3">
-            <input
-              id="questionInput"
-              type="text"
-              placeholder="Ask something…"
-              class="flex-1 rounded-lg border border-zinc-700 bg-zinc-800/70 px-4 py-2 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
-            <button
-              id="askBtn"
-              class="rounded-lg bg-primary-600 px-5 py-2 font-medium transition-colors hover:bg-primary-500 disabled:opacity-50 disabled:cursor-not-allowed">
-              Ask
-            </button>
+          <div class="flex items-center justify-between">
+            <h2 class="text-xl font-semibold flex items-center gap-2">
+              <i data-feather="message-circle" class="w-5 h-5 text-primary-500"></i>
+              Ask a Question
+            </h2>
+            <button id="clearBtn" class="text-xs rounded-md border border-zinc-700 px-2 py-1 hover:bg-zinc-800">Clear chat</button>
           </div>
 
-          <!-- Answer output -->
-          <div id="answerBox" class="prose prose-invert max-w-none leading-relaxed mt-6 hidden"></div>
+          <!-- Chat area -->
+          <div id="chatList" class="mt-6 flex-1 overflow-auto pr-1 scrollbar-thin space-y-4" aria-live="polite" aria-relevant="additions"></div>
 
-          <!-- Copy & sources -->
-          <div class="flex items-center gap-4 mt-4 hidden" id="answerMeta">
-            <button
-              id="copyBtn"
-              class="rounded bg-zinc-800 px-3 py-1 text-xs hover:bg-zinc-700 transition-colors">
-              Copy
-            </button>
-            <details>
-              <summary class="cursor-pointer text-xs text-primary-400">Sources</summary>
-              <ul id="sourceList" class="ml-6 mt-2 list-disc text-xs"></ul>
-            </details>
+          <!-- Input row -->
+          <div class="mt-4 flex gap-3">
+            <input id="questionInput" type="text" placeholder="Ask something… (Ctrl/⌘+K to focus)" class="flex-1 rounded-lg border border-zinc-700 bg-zinc-800/70 px-4 py-2 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-primary-500" />
+            <button id="askBtn" class="rounded-lg bg-primary-600 px-5 py-2 font-medium transition-colors hover:bg-primary-500 disabled:opacity-50 disabled:cursor-not-allowed">Ask</button>
+          </div>
+
+          <!-- Examples -->
+          <div class="mt-3 flex flex-wrap gap-2" id="examples">
+            <button class="example-chip">Summarize the key findings</button>
+            <button class="example-chip">What does section 3 say about risks?</button>
+            <button class="example-chip">List all KPIs with numbers</button>
           </div>
         </div>
       </section>
     </main>
 
     <!-- Toast -->
-    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 select-none pointer-events-none opacity-0 transition"></div>
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 select-none pointer-events-none opacity-0 transition" role="status" aria-live="assertive"></div>
 
-    <!-- Theme Toggle -->
-    <button
-      id="themeToggle"
-      class="fixed bottom-6 right-6 rounded-full bg-zinc-800 p-3 shadow-md shadow-black/20 backdrop-blur hover:bg-zinc-700 transition">
-      <i id="themeIcon" data-feather="sun" class="w-5 h-5"></i>
-    </button>
+    <!-- Footer -->
+    <footer class="border-t border-zinc-800 py-6 text-center text-xs text-zinc-500">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        <span>Shortcuts: </span>
+        <kbd class="rounded border border-zinc-700 bg-zinc-800 px-1">Enter</kbd> ask &middot;
+        <kbd class="rounded border border-zinc-700 bg-zinc-800 px-1">Ctrl/⌘</kbd>+<kbd class="rounded border border-zinc-700 bg-zinc-800 px-1">K</kbd> focus &middot;
+        <kbd class="rounded border border-zinc-700 bg-zinc-800 px-1">U</kbd> upload
+      </div>
+    </footer>
 
-    <!-- ── Scripts ──────────────────────────────────────────────── -->
+    <!-- Scripts -->
     <script>
       /* === Config === */
-      const backendURL = "https://rag-web-app.onrender.com";
+      // You can override backend by adding ?backend=https://your-host to the URL (optional; keeps default behavior)
+      const urlParams = new URLSearchParams(location.search);
+      const backendURL = urlParams.get('backend') || 'https://rag-web-app.onrender.com';
 
       /* === Elements === */
       const dropZone      = document.getElementById('dropZone');
@@ -154,42 +206,115 @@
       const progressWrap  = document.getElementById('progressWrap');
       const progressBar   = document.getElementById('progressBar');
       const uploadStatus  = document.getElementById('uploadStatus');
+      const fileMeta      = document.getElementById('fileMeta');
+      const fileNameEl    = document.getElementById('fileName');
+      const fileInfoEl    = document.getElementById('fileInfo');
+      const fileStatus    = document.getElementById('fileStatusBadge');
+      const replaceBtn    = document.getElementById('replaceBtn');
+
+      const chatList      = document.getElementById('chatList');
       const questionInput = document.getElementById('questionInput');
       const askBtn        = document.getElementById('askBtn');
-      const answerBox     = document.getElementById('answerBox');
-      const answerMeta    = document.getElementById('answerMeta');
-      const copyBtn       = document.getElementById('copyBtn');
-      const sourceList    = document.getElementById('sourceList');
+      const clearBtn      = document.getElementById('clearBtn');
+      const exportBtn     = document.getElementById('exportBtn');
+
       const toast         = document.getElementById('toast');
       const dropIcon      = document.getElementById('dropIcon');
 
-      /* === State === */
-      let documentId = null;
+      const examplesWrap  = document.getElementById('examples');
 
-      /* === Toast util === */
+      /* === State === */
+      let documentId = null;   // kept for parity with backend expectations
+      let chat = [];           // local chat history: [{q, a, sources}]
+      let uploading = false;
+
+      /* === Utilities === */
+      function fmtBytes(bytes) {
+        const units = ['B','KB','MB','GB'];
+        let i = 0; let n = bytes;
+        while (n >= 1024 && i < units.length-1) { n/=1024; i++; }
+        return `${n.toFixed(n >= 10 || i === 0 ? 0 : 1)} ${units[i]}`;
+      }
+
       function showToast(msg, variant = 'neutral') {
         toast.textContent = msg;
         toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 pointer-events-none px-5 py-3 rounded-lg shadow-lg transition';
         const colorMap = { success: 'bg-emerald-600', error: 'bg-rose-600', neutral: 'bg-zinc-800' };
-        toast.classList.add(colorMap[variant]);
+        toast.classList.add(colorMap[variant] || colorMap.neutral);
         toast.style.opacity = '1';
         setTimeout(() => (toast.style.opacity = '0'), 3000);
       }
 
-      /* === Drag animations === */
-      ['dragenter', 'dragover'].forEach(evt =>
-        dropZone.addEventListener(evt, e => {
-          e.preventDefault();
-          dropZone.classList.add('border-primary-500');
-          dropIcon.classList.add('animate-bounce');
-        })
-      );
-      ['dragleave', 'drop'].forEach(evt =>
-        dropZone.addEventListener(evt, e => {
-          dropZone.classList.remove('border-primary-500');
-          dropIcon.classList.remove('animate-bounce');
-        })
-      );
+      function createMsgEl(role, html, sources) {
+        const wrap = document.createElement('div');
+        wrap.className = role === 'user' ? 'flex justify-end' : 'flex justify-start';
+        const bubble = document.createElement('div');
+        bubble.className = 'max-w-[90%] rounded-2xl border px-4 py-3 text-sm shadow-sm ' + (role === 'user'
+          ? 'border-indigo-700/40 bg-indigo-600/20'
+          : 'border-zinc-800 bg-zinc-900/80');
+        bubble.innerHTML = html;
+        wrap.appendChild(bubble);
+
+        if (role === 'assistant' && Array.isArray(sources) && sources.length) {
+          const srcWrap = document.createElement('div');
+          srcWrap.className = 'mt-2 flex flex-wrap gap-1.5';
+          sources.forEach((s) => {
+            const isUrl = /^https?:\/\//i.test(s);
+            const chip = document.createElement(isUrl ? 'a' : 'span');
+            chip.className = 'inline-flex items-center gap-1 rounded-full border border-zinc-700 bg-zinc-800 px-2 py-0.5 text-[11px] text-zinc-300 hover:bg-zinc-700';
+            if (isUrl) { chip.href = s; chip.target = '_blank'; chip.rel = 'noopener noreferrer'; chip.title = s; }
+            chip.textContent = isUrl ? new URL(s).hostname : s;
+            srcWrap.appendChild(chip);
+          });
+          bubble.appendChild(srcWrap);
+        }
+
+        // Copy button (assistant only)
+        if (role === 'assistant') {
+          const copyBtn = document.createElement('button');
+          copyBtn.className = 'mt-2 text-xs underline decoration-dotted text-zinc-400 hover:text-zinc-200';
+          copyBtn.textContent = 'Copy answer';
+          copyBtn.addEventListener('click', () => {
+            const tmp = document.createElement('div');
+            tmp.innerHTML = html;
+            navigator.clipboard.writeText(tmp.textContent || '').then(() => showToast('Copied!', 'success'));
+          });
+          bubble.appendChild(copyBtn);
+        }
+
+        return wrap;
+      }
+
+      function renderChat() {
+        chatList.innerHTML = '';
+        chat.forEach(({ q, a, sources }) => {
+          chatList.appendChild(createMsgEl('user', marked.parseInline(q)));
+          chatList.appendChild(createMsgEl('assistant', marked.parse(a || ''), sources));
+        });
+        chatList.scrollTop = chatList.scrollHeight;
+      }
+
+      function setUploadingUI(start) {
+        uploading = !!start;
+        progressWrap.classList.toggle('invisible', !start);
+        askBtn.disabled = start || !documentId; // don't allow asking while uploading or before doc
+        fileStatus.textContent = start ? 'Processing…' : 'Ready';
+        fileStatus.className = 'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs ' + (start
+          ? 'border border-zinc-700 bg-zinc-800 text-zinc-300'
+          : 'border border-emerald-700/40 bg-emerald-600/20 text-emerald-300');
+      }
+
+      /* === Drag & drop === */
+      ;['dragenter','dragover'].forEach(evt => dropZone.addEventListener(evt, e => {
+        e.preventDefault();
+        dropZone.classList.add('border-primary-500');
+        dropIcon.classList.add('animate-bounce');
+      }));
+      ;['dragleave','drop'].forEach(evt => dropZone.addEventListener(evt, e => {
+        dropZone.classList.remove('border-primary-500');
+        dropIcon.classList.remove('animate-bounce');
+      }));
+
       dropZone.addEventListener('drop', e => {
         e.preventDefault();
         if (e.dataTransfer.files.length) {
@@ -197,6 +322,18 @@
           handleUpload();
         }
       });
+
+      // Keyboard shortcuts
+      window.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+          e.preventDefault(); questionInput.focus(); return;
+        }
+        if (e.key.toLowerCase() === 'u' && e.target === document.body) {
+          e.preventDefault(); fileInput.click(); return;
+        }
+      });
+
+      replaceBtn.addEventListener('click', () => fileInput.click());
       fileInput.addEventListener('change', handleUpload);
 
       /* === Upload logic === */
@@ -204,10 +341,14 @@
         const file = fileInput.files[0];
         if (!file) return;
 
-        progressWrap.classList.remove('invisible');
-        progressBar.style.width = '0%';
-        uploadStatus.classList.remove('hidden');
+        // Show basic meta
+        fileMeta.classList.remove('hidden');
+        fileNameEl.textContent = file.name;
+        fileInfoEl.textContent = `${fmtBytes(file.size)} · ${file.type || 'unknown type'}`;
         uploadStatus.textContent = `Uploading: ${file.name}`;
+
+        setUploadingUI(true);
+        progressBar.style.width = '0%';
 
         const xhr = new XMLHttpRequest();
         xhr.open('POST', `${backendURL}/upload`);
@@ -218,18 +359,27 @@
           }
         };
         xhr.onload = () => {
+          setUploadingUI(false);
           if (xhr.status === 200) {
-            const json = JSON.parse(xhr.responseText);
-            documentId = json.document_id;
-            uploadStatus.textContent = `✅ Processed (${json.chunks_created} chunks)`;
-            showToast('File processed', 'success');
+            try {
+              const json = JSON.parse(xhr.responseText);
+              documentId = json.document_id || documentId; // keep parity; don't require it downstream
+              uploadStatus.textContent = `✅ Processed (${json.chunks_created} chunks)`;
+              showToast('File processed', 'success');
+              askBtn.disabled = false;
+            } catch { /* fallback */
+              uploadStatus.textContent = '✅ Processed';
+              askBtn.disabled = false;
+            }
           } else {
-            const err = JSON.parse(xhr.responseText).error || 'Upload failed';
+            let errMsg = 'Upload failed';
+            try { errMsg = (JSON.parse(xhr.responseText).error) || errMsg; } catch {}
             uploadStatus.textContent = '❌ Upload failed';
-            showToast(err, 'error');
+            showToast(errMsg, 'error');
           }
         };
         xhr.onerror = () => {
+          setUploadingUI(false);
           uploadStatus.textContent = '❌ Upload failed';
           showToast('Upload failed', 'error');
         };
@@ -248,39 +398,79 @@
         if (!documentId) return showToast('Upload a document first', 'error');
 
         askBtn.disabled = true;
-        askBtn.textContent = '…';
-        answerBox.classList.add('hidden');
-        answerMeta.classList.add('hidden');
+        questionInput.value = '';
+
+        // Push user message
+        chat.push({ q, a: null, sources: [] });
+        renderChat();
+
+        // Temporary typing indicator
+        const typingEl = document.createElement('div');
+        typingEl.className = 'flex justify-start';
+        typingEl.innerHTML = '<div class="rounded-2xl border border-zinc-800 bg-zinc-900/80 px-4 py-3 text-sm text-zinc-400">Thinking<span class="floating-dots"></span></div>';
+        chatList.appendChild(typingEl);
+        chatList.scrollTop = chatList.scrollHeight;
 
         try {
           const res = await fetch(`${backendURL}/query`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ question: q })
+            body: JSON.stringify({ question: q }) // keep original API contract intact
           });
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || 'Query failed');
 
-          answerBox.innerHTML = marked.parse(data.answer || '');
-          answerBox.classList.remove('hidden');
-
-          if (data.sources && data.sources.length) {
-            sourceList.innerHTML = data.sources.map(s => `<li>${s}</li>`).join('');
-            answerMeta.classList.remove('hidden');
-          }
-
+          // Update last chat item
+          const last = chat[chat.length - 1];
+          last.a = data.answer || '';
+          last.sources = Array.isArray(data.sources) ? data.sources : [];
+          renderChat();
         } catch (err) {
           showToast(err.message || 'Query failed', 'error');
+          // Keep the user question but add an error bubble
+          const last = chat[chat.length - 1];
+          last.a = `**Error:** ${err.message || 'Query failed'}`;
+          last.sources = [];
+          renderChat();
         } finally {
-          askBtn.disabled = false;
-          askBtn.textContent = 'Ask';
+          askBtn.disabled = uploading || !documentId; // re-enable only if ready
         }
       }
 
-      /* === Copy answer === */
-      copyBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(answerBox.textContent).then(() => showToast('Copied!', 'success'));
+      /* === Examples === */
+      examplesWrap.querySelectorAll('.example-chip').forEach(btn => {
+        btn.classList.add('text-xs','rounded-full','border','border-zinc-700','bg-zinc-900','px-3','py-1','hover:bg-zinc-800');
+        btn.addEventListener('click', () => {
+          questionInput.value = btn.textContent;
+          questionInput.focus();
+        });
       });
+
+      /* === Clear & Export === */
+      clearBtn.addEventListener('click', () => {
+        chat = []; renderChat(); showToast('Cleared', 'neutral');
+      });
+
+      function exportMarkdown() {
+        if (!chat.length) return showToast('Nothing to export yet', 'neutral');
+        const lines = ['# RAG Q&A Transcript', '', `Exported: ${new Date().toLocaleString()}`, ''];
+        chat.forEach((item, idx) => {
+          lines.push(`## Q${idx+1}: ${item.q}`,'');
+          lines.push(item.a || '', '');
+          if (item.sources?.length) {
+            lines.push('**Sources:**');
+            item.sources.forEach(s => lines.push(`- ${s}`));
+            lines.push('');
+          }
+        });
+        const blob = new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'rag-qa-transcript.md';
+        document.body.appendChild(a); a.click();
+        setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 0);
+      }
+      exportBtn?.addEventListener('click', exportMarkdown);
 
       /* === Theme toggle === */
       const themeToggle = document.getElementById('themeToggle');
@@ -304,7 +494,7 @@
         applyTheme(next);
       });
 
-      /* Feather icon refresh */
+      // Initialize icons
       feather.replace();
     </script>
   </body>
